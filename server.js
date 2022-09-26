@@ -1,4 +1,5 @@
 var express = require("express");
+const { Server } = require("http");
 var app = express();
 var path = require("path");
 var blog = require("./blog-service");
@@ -42,3 +43,14 @@ app.use(function(req, res){
   
 // setup http server to listen on HTTP_PORT
 app.listen(HTTP_PORT);
+    
+/*app.listen(HTTP_PORT, function(){
+    var promise = new Promise((resolve, reject) => {
+        if(blog.initialize()
+        .then(() => {{ start the server}
+        console.log();
+    })
+    .catch((err) => {
+        console.error(err);
+        return promise;
+ */
