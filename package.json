@@ -1,0 +1,22 @@
+{
+  "name": "web322-app",
+  "version": "1.0.0",
+  "description": "web322 API backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "default"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharonyouchunxue/web322-app.git"
+  },
+  "author": "Chunxue You",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sharonyouchunxue/web322-app/issues"
+  },
+  "homepage": "https://github.com/sharonyouchunxue/web322-app#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
