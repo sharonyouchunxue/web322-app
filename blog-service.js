@@ -1,5 +1,4 @@
 const fs = require("fs");
-
 //initialize posts and categories to arrays globally
 var postsArray = [];
 var categoriesArray = [];
