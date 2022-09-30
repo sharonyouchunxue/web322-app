@@ -4,7 +4,7 @@ var postsArray = [];
 var categoriesArray = [];
 
 module.exports.initialize = function(){
-var promise = new Promise((resolve, reject) => {
+return new Promise((resolve, reject) => {
     try { fs.readFile('./data/posts.json', (err, data) => {
         if (err) 
         throw err;
@@ -21,53 +21,49 @@ var promise = new Promise((resolve, reject) => {
     console.log("unable to read file");
     reject("unable to read file");
 }
-console.log("success");
 resolve("success");
 })
-return promise;
-};
+}
 
 //getAllPosts function to check if the length of the array is 0, then no result returned
 module.exports.getAllPosts = function () {
-    var promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if(postsArray.length === 0) {
-            var err = "no results returned";
-            reject({message: err});
+            reject("no results returned");
         }
             resolve (postsArray);
         })
-            return promise;
-        };
+        }
 
 //getPublishedPosts() 
 module.exports.getPublishedPosts = function () {
-    var postsArray = [];
-    var promise = new Promise((resolve, reject) => {
-        for (var i=0; i < postsArray.length; i++){
-            if (postsArray[i].published == true) {
-                categoriesArray.push(postsArray[i]);
-            } 
-}
-if(categoriesArray.length === 0) {
-    var err = "no results returned";
-    reject({categoriesArray: err});
-}
-resolve (categoriesArray);
+    return new Promise((resolve, reject) => {
+        var publishedPosts = [];
+        for (let i=0; i < postsArray.length; i++){
+            if (postsArray[i].published === true) {
+                publishedPosts.push(postsArray[i]);
+             } 
+        }
+     if(publishedPosts.length === 0) {
+        reject("no results returned");
+    }
+    else{
+          resolve (publishedPosts);
+    }
 })
-return promise;
-};
+}
 
 //getCategories() function to check if the length of the array is 0, then no result returned
 module.exports.getCategories = function () {
-    var promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if(categoriesArray.length === 0) {
-            var err = "no results returned";
-            reject({message: err});
+            reject("no results returned");
         }
+        else{
         resolve (categoriesArray);
+    }
     })
-    return promise;
-};
+}
 
 
         
