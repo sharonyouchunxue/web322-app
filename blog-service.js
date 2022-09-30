@@ -1,29 +1,30 @@
-const fs = require("fs");
+const fs = require('fs');
+const express = require("express");
+//const { resolve } = require("path");
 //initialize posts and categories to arrays globally
 var postsArray = [];
 var categoriesArray = [];
-
-module.exports.initialize = function(){
-return new Promise((resolve, reject) => {
-    try { fs.readFile('./data/posts.json', (err, data) => {
-        if (err) 
-        throw err;
+ module.exports.initialize = function(){
+ return new Promise((resolve, reject) => {
+     try { fs.readFile('./data/posts.json', (err, data) => {
+         if (err) 
+         throw err;
         postsArray = JSON.parse(data);
-        console.log("posts initialized");
-    })
-    fs.readFile('./data/categories.json', (err, data) => {
-        if (err) 
-        throw err;
+         console.log("posts initialized");
+     })
+     fs.readFile('./data/categories.json', (err, data) => {
+         if (err) 
+       throw err;
         categoriesArray = JSON.parse(data);
-        console.log("categories initialized");
-    })
-} catch (ex) {
-    console.log("unable to read file");
-    reject("unable to read file");
-}
+        console.log("categories read");
+     })
+ } catch (err) {
+     console.log("unable to read file");
+     reject("unable to read file");
+ }
 resolve("success");
-})
-}
+ })
+ }
 
 //getAllPosts function to check if the length of the array is 0, then no result returned
 module.exports.getAllPosts = function () {
