@@ -1,6 +1,6 @@
 const fs = require('fs');
 const express = require("express");
-//const { resolve } = require("path");
+const { resolve } = require('path');
 //initialize posts and categories to arrays globally
 var postsArray = [];
 var categoriesArray = [];
@@ -10,7 +10,7 @@ var categoriesArray = [];
          if (err) 
          throw err;
         postsArray = JSON.parse(data);
-         console.log("posts initialized");
+         console.log("posts read");
      })
      fs.readFile('./data/categories.json', (err, data) => {
          if (err) 
@@ -66,13 +66,50 @@ module.exports.getCategories = function () {
     })
 }
 
+module.exports.addPost = function(postData){
+    return new Promise((resolve, reject) => {
+        postData.id = postsArray.length +1;
+        postData.published = (postData.published)? true: false;
+        postsArray.push(postData);
+        resolve();     
+    });
+};
 
-        
+module.exports.getPostsByCategory = (category)=>{
+    return new Promise((resolve,reject) => {
+        let filteredPosts = postsArray.filter((post)=>post.category==category);
+        if(filteredPosts.length == 0){
+            reject("no result returned");
+        }else {
+            resolve(filteredPosts);
+        }
+    });
+};
+ 
+module.exports.getPostsByMInDate = (minDateStr) =>{
+    return new Promise((resolve,reject)=>{
+        let filteredPosts = postsArray.filter(
+            (post) => new Date(post.postDate) >= new Date(minDateStr)
+        );
+        if(filteredPosts.length == 0){
+            reject("no result returned");
+        }
+        else {
+            resolve(filteredPosts);
+        }
+    });
+};
 
-
-
-
-
+module.exports.getPostById = (Id) =>{
+    return new Promise((resolve,reject) => {
+    let filteredPosts = postsArray.filter((post)=>post.id== Id);
+    if(filteredPosts.length == 0){
+        reject("no result returned");
+    }else {
+        resolve(filteredPosts);
+    }
+});
+};
 
 
 
