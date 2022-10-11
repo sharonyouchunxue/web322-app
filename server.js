@@ -1,11 +1,11 @@
 /*********************************************************************************
-*  WEB322 – Assignment 02
+*  WEB322 – Assignment 03
 *  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
 *  Name: Chunxue You   Student ID: 127632214   Date: September 29, 2022
 *
-*  Online (Cyclic) Link: https://stormy-plum-headscarf.cyclic.app
+*  Online (Cyclic) Link: 
 ********************************************************************************/ 
 
 var express = require("express");
