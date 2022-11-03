@@ -1,6 +1,7 @@
 const fs = require('fs');
 const express = require("express");
 const { resolve } = require('path');
+
 //initialize posts and categories to arrays globally
 var postsArray = [];
 var categoriesArray = [];
@@ -69,23 +70,21 @@ module.exports.getCategories = function () {
 module.exports.addPost = function(postData){
     return new Promise((resolve, reject) => {
         postData.id = postsArray.length +1;
-        postData.published = (postData.published)? true: false;
+        postData.published = (postsArray.published)? true: false;
+        let post = postData.postDate;
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+        if(dd < 10) dd = '0' + dd;
+        if(mm < 10) mm = '0' + mm;
+        today = yyyy + '-' + mm + '-' + dd;
+        postData.postDate = today;
         postsArray.push(postData);
         resolve();     
     });
 };
 
-module.exports.getPostsByCategory = (category)=>{
-    return new Promise((resolve,reject) => {
-        let filteredPosts = postsArray.filter((post)=>post.category==category);
-        if(filteredPosts.length == 0){
-            reject("no result returned");
-        }else {
-            resolve(filteredPosts);
-        }
-    });
-};
- 
 module.exports.getPostsByMInDate = (minDateStr) =>{
     return new Promise((resolve,reject)=>{
         let filteredPosts = postsArray.filter(
@@ -95,6 +94,17 @@ module.exports.getPostsByMInDate = (minDateStr) =>{
             reject("no result returned");
         }
         else {
+            resolve(filteredPosts);
+        }
+    });
+};
+
+module.exports.getPostsByCategory = (category)=>{
+    return new Promise((resolve,reject) => {
+        let filteredPosts = postsArray.filter((post)=>post.category==category);
+        if(filteredPosts.length == 0){
+            reject("no result returned");
+        }else {
             resolve(filteredPosts);
         }
     });
@@ -111,7 +121,23 @@ module.exports.getPostById = (Id) =>{
 });
 };
 
-
+//add a new blog-service function called getPublishedPostsByCategory(category)
+module.exports.getPublishedPostsByCategory = function () {
+    return new Promise((resolve, reject) => {
+        var publishedPosts = [];
+        for (let i=0; i < postsArray.length; i++){
+            if (postsArray[i].published === true&& postsArray[i].category == category) {
+                publishedPosts.push(postsArray[i]);
+             } 
+        }
+     if(publishedPosts.length === 0) {
+        reject("no results returned");
+    }
+    else{
+          resolve (publishedPosts);
+    }
+})
+}
 
 
 
