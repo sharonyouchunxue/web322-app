@@ -16,6 +16,8 @@ const streamifier = require('streamifier');
 const exphbs = require("express-handlebars");
 const path = require("path");
 const stripJs = require('strip-js');
+const authData = require('./auth-service.js')
+const clientSessions = require("client-sessions");
 
 const app = express();
 
@@ -70,6 +72,28 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
 
+app.use(clientSessions({cookieName: "session",
+                        secret: "web322_week8",
+                        duration: 2 * 60 * 1000, 
+                        activeDuration: 60 * 1000
+                    })
+                    );
+//custom middileware to add session to all the views(res)
+app.use(function(req, res, next) {
+    res.locals.session = req.session;
+    next();
+});
+//helper middleware(ensure login)
+//make sure the user is logged in
+function ensureLogin(req,res,next){
+    if(!req.session.user){
+        res.redirect("/login");
+    }
+    else{
+        next();
+    }
+}
+
 app.use(function (req, res, next) {let route = req.path.substring(1);
 app.locals.activeRoute ="/" +(isNaN(route.split("/")[1])? route.replace(/\/(?!.*)/, ""): route.replace(/\/(.*)/, ""));
 app.locals.viewingCategory = req.query.category;
@@ -78,7 +102,6 @@ next();
 
 app.get('/', (req, res) => {
     res.redirect("/blog");
-
 });
 
 app.get('/about', (req, res) => {
@@ -88,11 +111,9 @@ app.get('/about', (req, res) => {
 // adding the "/blog" route
 
 app.get('/blog', async (req, res) => {
-
     // Declare an object to store properties for the view
     let viewData = {};
     try{
-
         // declare empty array to hold "post" objects
         let posts = [];
 
@@ -134,7 +155,7 @@ app.get('/blog', async (req, res) => {
 
 });
 // updated the "/posts" route
-app.get('/posts', (req, res) => {
+app.get('/posts', ensureLogin,(req, res) => {
     if (req.query.category) {
         blogData.getPostsByCategory(req.query.category)
                 .then((data) => {
@@ -198,7 +219,7 @@ app.post("/posts/add", upload.single("featureImage"), (req,res)=>{
 
 //Updating the "Categories" List when Adding a new Post
 //"/posts/add" route
-app.get('/posts/add', (req, res) => {
+app.get('/posts/add',ensureLogin, (req, res) => {
      blogData.getCategories()
      .then(data => res.render("addPost", {categories: data}))
      .catch(err => res.render("addPost", {categories: []}))
@@ -206,7 +227,7 @@ app.get('/posts/add', (req, res) => {
  });
 
 
-app.get('/post/:id', (req,res)=>{
+app.get('/post/:id',ensureLogin, (req,res)=>{
     blogData.getPostById(req.params.id).then(data=>{
         res.json(data);
     }).catch(err=>{
@@ -214,7 +235,7 @@ app.get('/post/:id', (req,res)=>{
     });
 });
 
-app.get('/blog/:id', async (req, res) => {
+app.get('/blog/:id',ensureLogin, async (req, res) => {
     // Declare an object to store properties for the view
     let viewData = {};
     try{
@@ -256,7 +277,7 @@ app.get('/blog/:id', async (req, res) => {
 });
 
 //update categories route
-app.get('/categories', (req, res) => {
+app.get('/categories',ensureLogin, (req, res) => {
     blogData.getCategories().then((data => {
         if(data.length > 0) res.render("categories", {categories: data});
         else res.render("categories", { message: "no results" });
@@ -266,7 +287,7 @@ app.get('/categories', (req, res) => {
 });
 
 //Updating Routes (server.js) to Add / Remove Categories & Posts
-app.get("/categories/add", function (req, res) {
+app.get("/categories/add",ensureLogin, function (req, res) {
     res.render("addCategory");
 });
 
@@ -276,27 +297,72 @@ app.post("/categories/add", function (req, res) {
     });
 });
 
-app.get("/categories/delete/:id", function (req, res) {
+app.get("/categories/delete/:id",ensureLogin, function (req, res) {
     blogData.deleteCategoryById(req.params.id)
        .then(res.redirect("/categories"))
        .catch((err) =>res.status(500).send("Unable to Remove Category / Category not found")
        );
     });
 
-app.get("/posts/delete/:id", function (req, res) {
+app.get("/posts/delete/:id",ensureLogin, function (req, res) {
     blogData.deletePostById(req.params.id)
         .then(res.redirect("/posts"))
         .catch((err) =>res.status(500).send("Unable to Remove Post / Post not found"));
     });
 
+//create login route
+app.get("/login",function(req,res){
+    res.render('login');
+});
+//create registration route
+app.get("/register", function(req,res){
+    res.render('register');
+})
+
+//todo: post login route
+app.post("/login",(req,res)=>{
+    req.body.userAgent = req.get('User-Agent');
+    authData.checkUser(req.body).then((user)=>{
+        req.session.user = {
+            userName: user.userName,
+            email: user.email,
+            loginHistory: user.loginHistory
+        }
+        res.redirect('/posts');
+    }).catch((err)=>{
+        res.render("login", {errMessage: err,userName: req.body.userName});
+    });
+});
+
+//post for register
+app.post("/register",function(req,res){
+    authData.registerUser(req.body)
+    .then(()=> res.render('register', {successMessage: "User created"}))
+    .catch((err)=> res.render('register',{errorMessage: err, userName: req.body.userName} ))
+});
+
+//reset rout for logout
+app.get("/logout",ensureLogin,(req,res)=>{
+    req.session.reset();
+    res.redirect('/');
+})
+
+//rout for userHistory
+app.get("/userHistory", ensureLogin, function (req, res) {
+    res.render('userHistory');
+});
+
 app.use((req, res) => {
     res.status(404).render("404");
 })
 
-blogData.initialize().then(() => {
+//Adding authData.initialize to the "startup procedure":
+blogData.initialize()
+.then(authData.initialize)
+.then(function(){
     app.listen(HTTP_PORT, () => {
         console.log('server listening on: ' + HTTP_PORT);
     });
 }).catch((err) => {
-    console.log(err);
-})
+    console.log("unable to start server: " + err);
+});

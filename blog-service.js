@@ -34,8 +34,10 @@ const Category = sequelize.define("Category", {
 });
 
 //•	belongsTo Relationship
-//This will ensure that our Post model gets a "category" column that will act as a foreign key to the 
-//Category model.  When a Category is deleted, any associated Posts will have a "null" value set to their "category" foreign key.
+//This will ensure that our Post model gets a "category" column that will act as 
+//a foreign key to the Category model. 
+// When a Category is deleted, any associated Posts will have a 
+//"null" value set to their "category" foreign key.
 Post.belongsTo(Category, { foreignKey: "category" });
 
 //initialize()
@@ -158,7 +160,6 @@ module.exports.getCategories = function(){
     });
 };
 
-//Adding new blog-service.js functions delete Posts and Categories. 
 //add (promise-based) functions 
 module.exports.addCategory = (categoryData) => {
     return new Promise((resolve, reject) => {
@@ -172,7 +173,7 @@ module.exports.addCategory = (categoryData) => {
                .catch(reject("Unable to create category"))
         });
     };
-
+//Adding new blog-service.js functions delete Posts and Categories. 
 //deleteCategoryById(id)
 module.exports.deleteCategoryById = (id) => {
     return new Promise((resolve, reject) => {
